@@ -128,6 +128,36 @@ pivot_table = df_with_subcategory.pivot_table(values='value', index='category', 
 print("Pivot table with sum of values:")
 print(pivot_table)
 
+======================================================================
+question 5
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Sample time series data
+data = {
+    'date': pd.date_range(start='2023-01-01', periods=10, freq='D'),
+    'value': [10, 15, 14, 17, 18, 21, 20, 19, 23, 25]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+# Ensure 'date' column is of datetime type
+df['date'] = pd.to_datetime(df['date'])
+
+# Set 'date' as the index
+df.set_index('date', inplace=True)
+
+# Create a line plot to visualize the trend over time
+plt.figure(figsize=(10, 5))
+plt.plot(df.index, df['value'], marker='o', linestyle='-')
+plt.title('Trend Over Time')
+plt.xlabel('Date')
+plt.ylabel('Value')
+plt.grid(True)
+plt.show()
+
+
 
 
 

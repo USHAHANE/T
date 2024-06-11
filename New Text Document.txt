@@ -89,5 +89,45 @@ concatenated_df = pd.concat([df3, df4], ignore_index=True)
 
 print("Concatenated DataFrame:")
 print(concatenated_df)
+=======================================
+question 4)
+import pandas as pd
+
+# Sample data
+data = {
+    'category': ['A', 'B', 'A', 'B', 'C', 'A'],
+    'value': [10, 20, 30, 40, 50, 60]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+# Group by category and compute the sum of value
+grouped_sum_df = df.groupby('category')['value'].sum().reset_index()
+
+print("Grouped by category and summed values:")
+print(grouped_sum_df)
+# Group by category and compute the mean and standard deviation of value
+grouped_stats_df = df.groupby('category')['value'].agg(['mean', 'std']).reset_index()
+
+print("Grouped by category with mean and standard deviation:")
+print(grouped_stats_df)
+# Sample data with subcategory
+data_with_subcategory = {
+    'category': ['A', 'A', 'B', 'B', 'C', 'C'],
+    'subcategory': ['X', 'Y', 'X', 'Y', 'X', 'Y'],
+    'value': [10, 20, 30, 40, 50, 60]
+}
+
+# Create DataFrame
+df_with_subcategory = pd.DataFrame(data_with_subcategory)
+
+# Create pivot table
+pivot_table = df_with_subcategory.pivot_table(values='value', index='category', columns='subcategory', aggfunc='sum', fill_value=0)
+
+print("Pivot table with sum of values:")
+print(pivot_table)
+
+
 
 

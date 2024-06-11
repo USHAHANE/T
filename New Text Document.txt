@@ -39,41 +39,55 @@ csv_file_path, json_file_path, excel_file_path
 
 
 #====================================================================
-import numpy as np
+import pandas as pd
 
-# Creating sample dataset with missing values
-missing_values_data = {
-    'Name': ['Alice', 'Bob', 'Charlie', 'David', 'Eva'],
-    'Age': [25, np.nan, 35, 40, np.nan],
-    'City': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix']
+# Sample data for df1 and df2
+data1 = {
+    'id': [1, 2, 3],
+    'name': ['Alice', 'Bob', 'Charlie'],
+    'age': [25, 30, 35]
 }
-missing_values_df = pd.DataFrame(missing_values_data)
-missing_values_df.to_csv('/mnt/data/missing_values.csv', index=False)
-
-# Creating sample dataset with numerical columns as strings
-numerical_as_string_data = {
-    'Name': ['Grace', 'Hank', 'Ivy'],
-    'Age': ['55', '60', '65'],
-    'City': ['San Antonio', 'San Diego', 'Dallas']
+data2 = {
+    'id': [2, 3, 4],
+    'city': ['New York', 'Los Angeles', 'Chicago'],
+    'salary': [70000, 80000, 90000]
 }
-numerical_as_string_df = pd.DataFrame(numerical_as_string_data)
-numerical_as_string_df.to_csv('/mnt/data/numerical_as_string.csv', index=False)
 
-# Creating sample dataset with duplicate rows
-duplicate_rows_data = {
-    'Name': ['Jack', 'Kate', 'Leo', 'Mia', 'Jack', 'Kate'],
-    'Age': [70, 75, 80, 85, 70, 75],
-    'City': ['Miami', 'Seattle', 'Boston', 'Denver', 'Miami', 'Seattle']
+# Create DataFrames
+df1 = pd.DataFrame(data1)
+df2 = pd.DataFrame(data2)
+
+# Perform an inner join on the id column
+inner_merged_df = pd.merge(df1, df2, on='id', how='inner')
+
+print("Inner Join:")
+print(inner_merged_df)
+# Perform an outer join on the id column
+outer_merged_df = pd.merge(df1, df2, on='id', how='outer')
+
+print("Outer Join:")
+print(outer_merged_df)
+
+# Sample data for df3 and df4 with the same columns
+data3 = {
+    'id': [5, 6],
+    'name': ['David', 'Eva'],
+    'age': [40, 45]
 }
-duplicate_rows_df = pd.DataFrame(duplicate_rows_data)
-duplicate_rows_df.to_csv('/mnt/data/duplicate_rows.csv', index=False)
+data4 = {
+    'id': [7, 8],
+    'name': ['Frank', 'Grace'],
+    'age': [50, 55]
+}
 
-# Paths to the sample files
-missing_values_file_path = '/mnt/data/missing_values.csv'
-numerical_as_string_file_path = '/mnt/data/numerical_as_string.csv'
-duplicate_rows_file_path = '/mnt/data/duplicate_rows.csv'
+# Create DataFrames
+df3 = pd.DataFrame(data3)
+df4 = pd.DataFrame(data4)
 
-missing_values_file_path, numerical_as_string_file_path, duplicate_rows_file_path
+# Concatenate the DataFrames vertically
+concatenated_df = pd.concat([df3, df4], ignore_index=True)
 
+print("Concatenated DataFrame:")
+print(concatenated_df)
 
 

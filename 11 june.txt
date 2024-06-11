@@ -1,0 +1,56 @@
+1)
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+import matplotlib.pyplot as plt
+
+# Load the Titanic dataset from a CSV file
+titanic_data = pd.read_csv('path/to/titanic.csv')
+
+# Display the first few rows of the dataset
+print(titanic_data.head())
+
+# Handling missing values in the Age column using mean imputation
+titanic_data['Age'].fillna(titanic_data['Age'].mean(), inplace=True)
+
+# Handling missing values in the Embarked column using mode imputation
+titanic_data['Embarked'].fillna(titanic_data['Embarked'].mode()[0], inplace=True)
+
+# Handling missing values in the Cabin column using a placeholder
+titanic_data['Cabin'].fillna('Unknown', inplace=True)
+
+# Selecting the numerical features
+numerical_features = titanic_data[['Age', 'Fare']]
+
+# Standardizing the numerical features
+scaler = StandardScaler()
+standardized_features = scaler.fit_transform(numerical_features)
+standardized_df = pd.DataFrame(standardized_features, columns=['Age', 'Fare'])
+
+# Normalizing the numerical features
+min_max_scaler = MinMaxScaler()
+normalized_features = min_max_scaler.fit_transform(numerical_features)
+normalized_df = pd.DataFrame(normalized_features, columns=['Age', 'Fare'])
+
+# Plotting histograms to compare distributions
+fig, axs = plt.subplots(3, 2, figsize=(12, 18))
+
+# Original Age and Fare distributions
+axs[0, 0].hist(titanic_data['Age'], bins=20, color='blue', alpha=0.7)
+axs[0, 0].set_title('Original Age Distribution')
+axs[0, 1].hist(titanic_data['Fare'], bins=20, color='blue', alpha=0.7)
+axs[0, 1].set_title('Original Fare Distribution')
+
+# Standardized Age and Fare distributions
+axs[1, 0].hist(standardized_df['Age'], bins=20, color='green', alpha=0.7)
+axs[1, 0].set_title('Standardized Age Distribution')
+axs[1, 1].hist(standardized_df['Fare'], bins=20, color='green', alpha=0.7)
+axs[1, 1].set_title('Standardized Fare Distribution')
+
+# Normalized Age and Fare distributions
+axs[2, 0].hist(normalized_df['Age'], bins=20, color='red', alpha=0.7)
+axs[2, 0].set_title('Normalized Age Distribution')
+axs[2, 1].hist(normalized_df['Fare'], bins=20, color='red', alpha=0.7)
+axs[2, 1].set_title('Normalized Fare Distribution')
+
+plt.tight_layout()
+plt.show()

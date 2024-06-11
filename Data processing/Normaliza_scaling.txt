@@ -1,0 +1,63 @@
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+#StandardScaler
+# Creating a sample DataFrame
+data = {
+    'Feature1': [1, 2, 3, 4, 5],
+    'Feature2': [10, 20, 30, 40, 50],
+    'Feature3': [100, 200, 300, 400, 500]
+}
+df = pd.DataFrame(data)
+
+# Applying standardization
+scaler = StandardScaler()
+df_standardized = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
+
+print("Standardized DataFrame:\n", df_standardized)
+ s
+===========================================================
+============================================================
+#MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
+
+# Applying min-max scaling
+scaler = MinMaxScaler()
+df_minmax_scaled = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
+
+print("Min-Max Scaled DataFrame:\n", df_minmax_scaled)
+
+
+#RobustScaler
+from sklearn.preprocessing import RobustScaler
+
+# Applying robust scaling
+scaler = RobustScaler()
+df_robust_scaled = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
+
+print("Robust Scaled DataFrame:\n", df_robust_scaled)
+
+==========================================================
+===============================================================
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder, OrdinalEncoder
+
+# One-Hot Encoding Example
+data_one_hot = {
+    'City': ['New York', 'Paris', 'Berlin', 'New York', 'Berlin']
+}
+df_one_hot = pd.DataFrame(data_one_hot)
+print(df_one_hot)
+
+# Using pandas get_dummies for One-Hot Encoding
+df_one_hot_pd = pd.get_dummies(df_one_hot, columns=['City'])
+print("One-Hot Encoded DataFrame using pandas:\n", df_one_hot_pd)
+
+# Using sklearn's OneHotEncoder
+encoder = OneHotEncoder(sparse_output=False)
+one_hot_encoded = encoder.fit_transform(df_one_hot[['City']])
+print('before \n',one_hot_encoded)
+df_one_hot_sklearn = pd.DataFrame(one_hot_encoded,
+                                  columns=encoder.get_feature_names_out(['City']))
+print("One-Hot Encoded DataFrame using sklearn:\n", df_one_hot_sklearn)
+ 

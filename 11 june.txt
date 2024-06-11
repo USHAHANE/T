@@ -34,6 +34,7 @@ normalized_df = pd.DataFrame(normalized_features, columns=['Age', 'Fare'])
 # Plotting histograms to compare distributions
 fig, axs = plt.subplots(3, 2, figsize=(12, 18))
 
+
 # Original Age and Fare distributions
 axs[0, 0].hist(titanic_data['Age'], bins=20, color='blue', alpha=0.7)
 axs[0, 0].set_title('Original Age Distribution')
@@ -53,4 +54,102 @@ axs[2, 1].hist(normalized_df['Fare'], bins=20, color='red', alpha=0.7)
 axs[2, 1].set_title('Normalized Fare Distribution')
 
 plt.tight_layout()
+plt.show()
+
+============================================================================
+2)
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+
+# Load the Iris dataset from a CSV file
+iris_data = pd.read_csv('path/to/iris.csv')
+
+# Display the first few rows of the dataset
+print(iris_data.head())
+
+# Perform one-hot encoding on the Species column
+iris_one_hot_encoded = pd.get_dummies(iris_data, columns=['Species'])
+print("One-hot encoded data:")
+print(iris_one_hot_encoded.head())
+
+# Perform label encoding on the Species column
+label_encoder = LabelEncoder()
+iris_data['Species_Label'] = label_encoder.fit_transform(iris_data['Species'])
+print("Label encoded data:")
+print(iris_data.head())
+
+# Create a new feature PetalArea by multiplying PetalLength and PetalWidth
+iris_data['PetalArea'] = iris_data['PetalLength'] * iris_data['PetalWidth']
+
+# Create a new feature SepalArea by multiplying SepalLength and SepalWidth
+iris_data['SepalArea'] = iris_data['SepalLength'] * iris_data['SepalWidth']
+
+# Display the first few rows of the dataset with the new features
+print("Data with new features (PetalArea and SepalArea):")
+print(iris_data.head())
+
+===========================================================================
+3)
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the Titanic dataset from a CSV file
+titanic_data = pd.read_csv('path/to/titanic.csv')
+
+# Display the first few rows of the dataset
+print(titanic_data.head())
+
+# Create box plots for Age and Fare columns
+plt.figure(figsize=(14, 6))
+plt.subplot(1, 2, 1)
+sns.boxplot(y=titanic_data['Age'])
+plt.title('Box Plot of Age')
+
+plt.subplot(1, 2, 2)
+sns.boxplot(y=titanic_data['Fare'])
+plt.title('Box Plot of Fare')
+
+plt.tight_layout()
+plt.show()
+
+# Create histograms and KDE plots for Age and Fare columns
+plt.figure(figsize=(14, 6))
+plt.subplot(2, 2, 1)
+sns.histplot(titanic_data['Age'], kde=True)
+plt.title('Histogram and KDE of Age')
+
+plt.subplot(2, 2, 2)
+sns.histplot(titanic_data['Fare'], kde=True)
+plt.title('Histogram and KDE of Fare')
+
+plt.subplot(2, 2, 3)
+sns.kdeplot(titanic_data['Age'], shade=True)
+plt.title('KDE of Age')
+
+plt.subplot(2, 2, 4)
+sns.kdeplot(titanic_data['Fare'], shade=True)
+plt.title('KDE of Fare')
+
+plt.tight_layout()
+plt.show()
+
+# Create scatter plots to visualize relationships
+plt.figure(figsize=(14, 6))
+plt.subplot(1, 2, 1)
+sns.scatterplot(x='Age', y='Fare', data=titanic_data)
+plt.title('Scatter Plot of Age vs Fare')
+
+plt.subplot(1, 2, 2)
+sns.scatterplot(x='Pclass', y='Survived', data=titanic_data, alpha=0.5)
+plt.title('Scatter Plot of Pclass vs Survived')
+
+plt.tight_layout()
+plt.show()
+
+# Select relevant numerical features for the pair plot
+numerical_features = titanic_data[['Age', 'Fare', 'Pclass', 'Survived']]
+
+# Create pair plots to visualize relationships
+sns.pairplot(numerical_features, hue='Pclass', palette='viridis')
 plt.show()

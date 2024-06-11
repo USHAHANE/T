@@ -1,0 +1,79 @@
+import pandas as pd
+
+# Creating sample data for CSV, JSON, and Excel formats
+question 1)
+
+# Sample CSV data
+csv_data = {
+    'Name': ['Alice', 'Bob', 'Charlie'],
+    'Age': [25, 30, 35],
+    'City': ['New York', 'Los Angeles', 'Chicago']
+}
+csv_df = pd.DataFrame(csv_data)
+csv_df.to_csv('/mnt/data/data.csv', index=False)
+
+# Sample JSON data
+json_data = [
+    {"Name": "David", "Age": 40, "City": "Houston"},
+    {"Name": "Eva", "Age": 45, "City": "Phoenix"},
+    {"Name": "Frank", "Age": 50, "City": "Philadelphia"}
+]
+json_df = pd.DataFrame(json_data)
+json_df.to_json('/mnt/data/data.json', orient='records', lines=True)
+
+# Sample Excel data
+excel_data = {
+    'Name': ['Grace', 'Hank', 'Ivy'],
+    'Age': [55, 60, 65],
+    'City': ['San Antonio', 'San Diego', 'Dallas']
+}
+excel_df = pd.DataFrame(excel_data)
+excel_df.to_excel('/mnt/data/data.xlsx', index=False)
+
+# Paths to the sample files
+csv_file_path = '/mnt/data/data.csv'
+json_file_path = '/mnt/data/data.json'
+excel_file_path = '/mnt/data/data.xlsx'
+
+csv_file_path, json_file_path, excel_file_path
+
+
+#====================================================================
+import numpy as np
+
+# Creating sample dataset with missing values
+missing_values_data = {
+    'Name': ['Alice', 'Bob', 'Charlie', 'David', 'Eva'],
+    'Age': [25, np.nan, 35, 40, np.nan],
+    'City': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix']
+}
+missing_values_df = pd.DataFrame(missing_values_data)
+missing_values_df.to_csv('/mnt/data/missing_values.csv', index=False)
+
+# Creating sample dataset with numerical columns as strings
+numerical_as_string_data = {
+    'Name': ['Grace', 'Hank', 'Ivy'],
+    'Age': ['55', '60', '65'],
+    'City': ['San Antonio', 'San Diego', 'Dallas']
+}
+numerical_as_string_df = pd.DataFrame(numerical_as_string_data)
+numerical_as_string_df.to_csv('/mnt/data/numerical_as_string.csv', index=False)
+
+# Creating sample dataset with duplicate rows
+duplicate_rows_data = {
+    'Name': ['Jack', 'Kate', 'Leo', 'Mia', 'Jack', 'Kate'],
+    'Age': [70, 75, 80, 85, 70, 75],
+    'City': ['Miami', 'Seattle', 'Boston', 'Denver', 'Miami', 'Seattle']
+}
+duplicate_rows_df = pd.DataFrame(duplicate_rows_data)
+duplicate_rows_df.to_csv('/mnt/data/duplicate_rows.csv', index=False)
+
+# Paths to the sample files
+missing_values_file_path = '/mnt/data/missing_values.csv'
+numerical_as_string_file_path = '/mnt/data/numerical_as_string.csv'
+duplicate_rows_file_path = '/mnt/data/duplicate_rows.csv'
+
+missing_values_file_path, numerical_as_string_file_path, duplicate_rows_file_path
+
+
+

@@ -1,0 +1,104 @@
+1) 
+import torch
+
+# Problem 1
+# Step 1: Create a 3x3 tensor with random values
+tensor1 = torch.rand(3, 3)
+print("Original Tensor:\n", tensor1)
+
+# Step 2: Add 10 to each element
+tensor1_add = tensor1 + 10
+print("\nTensor after adding 10 to each element:\n", tensor1_add)
+
+# Step 3: Multiply each element by 2
+tensor1_mult = tensor1_add * 2
+print("\nTensor after multiplying each element by 2:\n", tensor1_mult)
+
+# Step 4: Calculate the mean and standard deviation of the tensor
+mean_val = tensor1_mult.mean()
+std_val = tensor1_mult.std()
+print("\nMean of the tensor:", mean_val.item())
+print("Standard Deviation of the tensor:", std_val.item())
+
+# Problem 2
+# Step 1: Create two 3x3 tensors with random values
+tensor2 = torch.rand(3, 3)
+tensor3 = torch.rand(3, 3)
+print("\nTensor 2:\n", tensor2)
+print("Tensor 3:\n", tensor3)
+
+# Step 2: Perform element-wise addition
+tensor_add = tensor2 + tensor3
+print("\nElement-wise addition of tensor2 and tensor3:\n", tensor_add)
+
+# Step 3: Perform element-wise multiplication
+tensor_mult = tensor2 * tensor3
+print("\nElement-wise multiplication of tensor2 and tensor3:\n", tensor_mult)
+
+# Problem 3
+# Step 1: Create a tensor with values from 1 to 16
+tensor4 = torch.arange(1, 17).reshape(4, 4)
+print("\n4x4 Tensor:\n", tensor4)
+
+# Step 2: Extract the first two rows and last two columns
+extracted_tensor = tensor4[:2, -2:]
+print("\nExtracted first two rows and last two columns:\n", extracted_tensor)
+
+
+
+==========================================================================================================================
+2)
+from PIL import Image
+from torchvision import transforms
+import requests
+from io import BytesIO
+from torchvision.transforms import functional as F
+
+# Load an image using PIL
+image_url = "https://example.com/path/to/your/image.jpg"  # Replace with your image URL
+response = requests.get(image_url)
+img = Image.open(BytesIO(response.content))
+
+# Problem 1
+# Convert the image to a PyTorch tensor and normalize it
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+])
+tensor_img = transform(img)
+print("Transformed Tensor Image:\n", tensor_img)
+
+# Problem 2
+# Custom transformation to rotate an image by 45 degrees
+class RotateTransform:
+    def __init__(self, angle):
+        self.angle = angle
+
+    def __call__(self, x):
+        return F.rotate(x, self.angle)
+
+# Chain custom transformation with resize
+transform = transforms.Compose([
+    RotateTransform(45),
+    transforms.Resize((128, 128)),
+    transforms.ToTensor()
+])
+
+# Apply the transformation to the image
+transformed_img = transform(img)
+print("Transformed Image after Rotation and Resize:\n", transformed_img)
+
+# Problem 3
+# Transformations: Random horizontal flip, random crop, and convert to grayscale
+transform = transforms.Compose([
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomCrop(100),
+    transforms.Grayscale(num_output_channels=1),
+    transforms.ToTensor()
+])
+
+# Apply the transformations to the image
+transformed_img = transform(img)
+print("Transformed Image after Horizontal Flip, Crop, and Grayscale:\n", transformed_img)
+
+

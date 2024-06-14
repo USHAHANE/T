@@ -1,0 +1,65 @@
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from keras.datasets import boston_housing
+
+# Load the dataset
+(x_train, y_train), (x_test, y_test) = boston_housing.load_data()
+
+# Convert to PyTorch tensors
+x_train = torch.tensor(x_train, dtype=torch.float32)
+y_train = torch.tensor(y_train, dtype=torch.float32).view(-1, 1)
+x_test = torch.tensor(x_test, dtype=torch.float32)
+y_test = torch.tensor(y_test, dtype=torch.float32).view(-1, 1)
+
+# Define the model
+class LinearRegressionModel(nn.Module):
+    def __init__(self):
+        super(LinearRegressionModel, self).__init__()
+        self.linear = nn.Linear(13, 1)
+
+    def forward(self, x):
+        return self.linear(x)
+
+# Initialize the model, loss function, and optimizer
+model = LinearRegressionModel()
+criterion = nn.MSELoss()
+optimizer = optim.SGD(model.parameters(), lr=0.01)
+
+# Train the model
+num_epochs = 1000
+for epoch in range(num_epochs):
+    # Forward pass
+    outputs = model(x_train)
+    loss = criterion(outputs, y_train)
+    
+    # Backward pass and optimization
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    
+    if (epoch+1) % 100 == 0:
+        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+
+# Plotting the results
+def plot_predictions(model, x, y, title):
+    model.eval()
+    with torch.no_grad():
+        predictions = model(x).numpy()
+        y = y.numpy()
+        plt.scatter(y, predictions)
+        plt.xlabel("Actual Prices")
+        plt.ylabel("Predicted Prices")
+        plt.title(title)
+        plt.plot([y.min(), y.max()], [y.min(), y.max()], 'k--', lw=3)
+        plt.show()
+
+# Plot predictions for training set
+plot_predictions(model, x_train, y_train, "Predicted vs Actual Prices (Training Set)")
+
+# Plot predictions for test set
+plot_predictions(model, x_test, y_test, "Predicted vs Actual Prices (Test Set)")

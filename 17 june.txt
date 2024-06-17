@@ -65,3 +65,43 @@ plt.xlabel('PCA Component 1')
 plt.ylabel('PCA Component 2')
 plt.legend()
 plt.show()
+
+
+
+
+================================================================================================================================================================
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
+import matplotlib.pyplot as plt
+
+# Load the Wine Quality dataset
+url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv'
+wine_data = pd.read_csv(url, sep=';')
+
+# Preprocess the data
+features = wine_data.drop('quality', axis=1)
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+
+# Apply Hierarchical Clustering
+# Compute the linkage matrix
+linkage_matrix = linkage(scaled_features, method='ward')
+
+# Create and Visualize the Dendrogram
+plt.figure(figsize=(12, 8))
+dendrogram(linkage_matrix)
+plt.title('Hierarchical Clustering Dendrogram')
+plt.xlabel('Sample index')
+plt.ylabel('Distance')
+plt.show()
+
+# Determine the clusters
+max_d = 50  # This can be adjusted based on the dendrogram
+clusters = fcluster(linkage_matrix, max_d, criterion='distance')
+
+# Evaluate the Clustering Performance
+sil_score = silhouette_score(scaled_features, clusters)
+print(f'Silhouette Score: {sil_score}')
+

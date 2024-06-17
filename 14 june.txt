@@ -1,0 +1,120 @@
+1)
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+# Load the Balance Scale dataset
+url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/balance-scale/balance-scale.data'
+column_names = ['Class', 'Left-Weight', 'Left-Distance', 'Right-Weight', 'Right-Distance']
+data = pd.read_csv(url, header=None, names=column_names)
+
+# Filter out rows with class 'B'
+data = data[data['Class'] != 'B']
+
+# Separate features and target
+X = data[['Left-Weight', 'Left-Distance', 'Right-Weight', 'Right-Distance']]
+y = data['Class']
+
+# Convert target to binary (L=0, R=1)
+y = y.map({'L': 0, 'R': 1})
+
+# Normalize the features
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Convert to PyTorch tensors
+X_train = torch.tensor(X_train, dtype=torch.float32)
+X_test = torch.tensor(X_test, dtype=torch.float32)
+y_train = torch.tensor(y_train.values, dtype=torch.float32).unsqueeze(1)
+y_test = torch.tensor(y_test.values, dtype=torch.float32).unsqueeze(1)
+
+# Define the Logistic Regression Model
+class LogisticRegressionModel(nn.Module):
+    def __init__(self, input_dim):
+        super(LogisticRegressionModel, self).__init__()
+        self.linear = nn.Linear(input_dim, 1)
+    
+    def forward(self, x):
+        out = torch.sigmoid(self.linear(x))
+        return out
+
+# Model initialization
+input_dim = X_train.shape[1]
+model = LogisticRegressionModel(input_dim)
+
+# Loss and optimizer
+criterion = nn.BCELoss()
+optimizer = optim.SGD(model.parameters(), lr=0.01)
+
+# Training the model
+num_epochs = 1000
+for epoch in range(num_epochs):
+    # Forward pass
+    outputs = model(X_train)
+    loss = criterion(outputs, y_train)
+    
+    # Backward and optimize
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    
+    if (epoch+1) % 100 == 0:
+        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+
+# Evaluate the model
+with torch.no_grad():
+    y_predicted = model(X_test)
+    y_predicted_cls = y_predicted.round()
+    accuracy = y_predicted_cls.eq(y_test).sum() / float(y_test.shape[0])
+    print(f'Accuracy: {accuracy:.4f}')
+
+=========================================================================
+
+2)
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+# Load the Wine Quality dataset
+url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv'
+data = pd.read_csv(url, sep=';')
+
+# Binarize the target variable (quality >= 7 -> good, quality < 7 -> bad)
+data['quality'] = data['quality'].apply(lambda x: 1 if x >= 7 else 0)
+
+# Separate features and target
+X = data.drop('quality', axis=1)
+y = data['quality']
+
+# Normalize the features
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Function to evaluate k-NN with different values of k
+def evaluate_knn(k_values):
+    accuracies = {}
+    for k in k_values:
+        knn = KNeighborsClassifier(n_neighbors=k)
+        knn.fit(X_train, y_train)
+        y_pred = knn.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        accuracies[k] = accuracy
+    return accuracies
+
+# Experiment with different values of k
+k_values = [3, 5, 7]
+accuracies = evaluate_knn(k_values)
+
+for k in k_values:
+    print(f'Accuracy with k={k}: {accuracies[k]:.4f}')

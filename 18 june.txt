@@ -1,0 +1,58 @@
+1)
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+import matplotlib.pyplot as plt
+data = pd.read_csv( delimiter=';')
+X = data.drop(columns=['quality'])
+y = data['quality']
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+cov_matrix_np = np.cov(X_scaled, rowvar=False)
+eigenvalues_np, eigenvectors_np = np.linalg.eig(cov_matrix_np)
+sorted_indices_np = np.argsort(eigenvalues_np)[::-1]
+sorted_eigenvalues_np = eigenvalues_np[sorted_indices_np]
+sorted_eigenvectors_np = eigenvectors_np[:, sorted_indices_np]
+pc1_np = sorted_eigenvectors_np[:, 0]
+pc2_np = sorted_eigenvectors_np[:, 1]
+X_pca_np = np.dot(X_scaled, np.stack((pc1_np, pc2_np), axis=1))
+plt.figure(figsize=(10, 7))
+plt.scatter(X_pca_np[:, 0], X_pca_np[:, 1], c=y, cmap='viridis', edgecolor='k', s=50)
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.title('PCA of  Dataset')
+plt.show()
+
+===========================================================
+
+2)
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+data = pd.read_csv( sep=';')
+features = data.drop(columns=['quality'])
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+tsne_2d = TSNE(n_components=2, random_state=42)
+tsne_2d = tsne_2d.fit_transform(scaled_features)
+tsne_3d = TSNE(n_components=3, random_state=42)
+tsne_3d = tsne_3d.fit_transform(scaled_features)
+plt.figure(figsize=(10, 7))
+plt.scatter(tsne_2d[:, 0], tsne_2d[:, 1], c=data['quality'], cmap='viridis')
+plt.colorbar(label='Quality')
+plt.title('2D t-SNE of Dataset')
+plt.xlabel('Component 1')
+plt.ylabel('Component 2')
+plt.show()
+fig = plt.figure(figsize=(10, 7))
+ax = fig.add_subplot(111, projection='3d')
+scatter = ax.scatter(tsne_3d[:, 0], tsne_3d[:, 1], tsne_3d[:, 2], c=data['quality'], cmap='viridis')
+legend1 = ax.legend(*scatter.legend_elements(), title="Quality")
+ax.add_artist(legend1)
+ax.set_title('3D t-SNE of Dataset')
+ax.set_xlabel('Component 1')
+ax.set_ylabel('Component 2')
+ax.set_zlabel('Component 3')
+plt.show()

@@ -1,0 +1,258 @@
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from torch.utils.data import DataLoader, TensorDataset
+import pandas as pd
+
+# Load and preprocess dataset
+df = pd.read_csv('housing_prices.csv')  # Replace with your dataset path
+features = df.drop('price', axis=1).values
+prices = df['price'].values
+
+# Normalize the data
+scaler = StandardScaler()
+features = scaler.fit_transform(features)
+
+# Split the data
+X_train, X_val, y_train, y_val = train_test_split(features, prices, test_size=0.2, random_state=42)
+
+# Convert to PyTorch tensors
+X_train = torch.tensor(X_train, dtype=torch.float32)
+X_val = torch.tensor(X_val, dtype=torch.float32)
+y_train = torch.tensor(y_train, dtype=torch.float32).view(-1, 1)
+y_val = torch.tensor(y_val, dtype=torch.float32).view(-1, 1)
+
+train_dataset = TensorDataset(X_train, y_train)
+val_dataset = TensorDataset(X_val, y_val)
+
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+
+# Define model
+class SimpleNN(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super(SimpleNN, self).__init__()
+        self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_dim, output_dim)
+        
+    def forward(self, x):
+        out = self.fc1(x)
+        out = self.relu(out)
+        out = self.fc2(out)
+        return out
+
+input_dim = X_train.shape[1]
+hidden_dim = 64
+output_dim = 1
+
+model = SimpleNN(input_dim, hidden_dim, output_dim)
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# Training with early stopping
+train_loss_history, val_loss_history = train_model_with_early_stopping(
+    model, criterion, optimizer, train_loader, val_loader, num_epochs=100, patience=10
+)
+
+# Plot loss curves
+plot_loss_curves(train_loss_history, val_loss_history)
+
+
+==============================================================
+=====================================================
+
+
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# Define the neural network
+class SimpleNN(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super(SimpleNN, self).__init__()
+        self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_dim, output_dim)
+        
+    def forward(self, x):
+        out = self.fc1(x)
+        out = self.relu(out)
+        out = self.fc2(out)
+        return out
+
+# Training function with early stopping
+def train_model(model, criterion, optimizer, train_loader, val_loader, num_epochs=100, patience=10):
+    train_loss_history = []
+    val_loss_history = []
+    best_val_loss = float('inf')
+    patience_counter = 0
+
+    for epoch in range(num_epochs):
+        model.train()
+        epoch_loss = 0
+        for inputs, labels in train_loader:
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            epoch_loss += loss.item()
+        
+        avg_epoch_loss = epoch_loss / len(train_loader)
+        train_loss_history.append(avg_epoch_loss)
+        
+        model.eval()
+        val_loss = 0
+        with torch.no_grad():
+            for inputs, labels in val_loader:
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                val_loss += loss.item()
+        
+        avg_val_loss = val_loss / len(val_loader)
+        val_loss_history.append(avg_val_loss)
+
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            patience_counter = 0
+            # Save the best model
+            torch.save(model.state_dict(), 'best_model.pth')
+        else:
+            patience_counter += 1
+
+        if patience_counter >= patience:
+            print(f'Early stopping at epoch {epoch+1}')
+            break
+
+        print(f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {avg_epoch_loss:.4f}, Val Loss: {avg_val_loss:.4f}')
+    
+    return train_loss_history, val_loss_history
+
+def plot_loss_curves(train_loss_history, val_loss_history):
+    plt.plot(train_loss_history, label='Training Loss')
+    plt.plot(val_loss_history, label='Validation Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
+
+# Load and preprocess a sample dataset
+df = pd.read_csv('housing_prices.csv')  # Replace with your dataset path
+features = df.drop('price', axis=1).values
+prices = df['price'].values
+
+# Normalize the data
+scaler = StandardScaler()
+features = scaler.fit_transform(features)
+
+# Split the data
+X_train, X_val, y_train, y_val = train_test_split(features, prices, test_size=0.2, random_state=42)
+
+# Convert to PyTorch tensors
+X_train = torch.tensor(X_train, dtype=torch.float32)
+X_val = torch.tensor(X_val, dtype=torch.float32)
+y_train = torch.tensor(y_train, dtype=torch.float32).view(-1, 1)
+y_val = torch.tensor(y_val, dtype=torch.float32).view(-1, 1)
+
+train_dataset = TensorDataset(X_train, y_train)
+val_dataset = TensorDataset(X_val, y_val)
+
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+
+input_dim = X_train.shape[1]
+hidden_dim = 64
+output_dim = 1
+
+model = SimpleNN(input_dim, hidden_dim, output_dim)
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# Train the model with early stopping
+train_loss_history, val_loss_history = train_model(model, criterion, optimizer, train_loader, val_loader, num_epochs=100, patience=10)
+
+# Plot the loss curves
+plot_loss_curves(train_loss_history, val_loss_history)
+===============================================================
+import torchvision
+import torchvision.transforms as transforms
+
+# Define the CNN
+class CNN(nn.Module):
+    def __init__(self):
+        super(CNN, self).__init__()
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
+        self.fc1 = nn.Linear(64 * 8 * 8, 128)
+        self.fc2 = nn.Linear(128, 10)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(0.5)
+
+    def forward(self, x):
+        x = self.pool(self.relu(self.conv1(x)))
+        x = self.pool(self.relu(self.conv2(x)))
+        x = x.view(-1, 64 * 8 * 8)
+        x = self.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.fc2(x)
+        return x
+
+# Load CIFAR-10 data
+transform = transforms.Compose(
+    [transforms.ToTensor(),
+     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
+                                        download=True, transform=transform)
+trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
+
+testset = torchvision.datasets.CIFAR10(root='./data', train=False,
+                                       download=True, transform=transform)
+testloader = DataLoader(testset, batch_size=32, shuffle=False)
+
+# Train the CNN
+cnn_model = CNN()
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(cnn_model.parameters(), lr=0.001)
+
+# Train the model with early stopping
+train_loss_history, val_loss_history = train_model(cnn_model, criterion, optimizer, trainloader, testloader, num_epochs=20, patience=5)
+
+# Plot the loss curves
+plot_loss_curves(train_loss_history, val_loss_history)
+
+# Evaluation metrics
+def evaluate_model(model, testloader):
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for data in testloader:
+            images, labels = data
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    accuracy = 100 * correct / total
+    print(f'Accuracy of the network on the 10000 test images: {accuracy:.2f}%')
+
+evaluate_model(cnn_model, testloader)
+
+# Save the model
+torch.save(cnn_model.state_dict(), 'cnn_model.pth')
+
+# Load the model
+loaded_model = CNN()
+loaded_model.load_state_dict(torch.load('cnn_model.pth'))

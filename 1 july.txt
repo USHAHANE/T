@@ -1,0 +1,173 @@
+import requests
+import re
+import torch
+from torch.utils.data import Dataset, DataLoader
+import numpy as np
+import torch.nn as nn
+import torch.optim as optim
+import matplotlib.pyplot as plt
+
+# Download the text
+url = "https://www.gutenberg.org/files/1041/1041-0.txt"
+response = requests.get(url)
+data = response.text
+
+# Preprocess the text
+tokens = re.findall(r'\b\w+\b', data.lower())
+vocab = sorted(set(tokens))
+vocab_to_int = {word: i for i, word in enumerate(vocab)}
+int_to_vocab = {i: word for word, i in vocab_to_int.items()}
+
+# Encode the text
+encoded_text = [vocab_to_int[word] for word in tokens]
+
+# Create input sequences and targets
+seq_length = 100
+sequences = []
+targets = []
+
+for i in range(len(encoded_text) - seq_length):
+    sequences.append(encoded_text[i:i+seq_length])
+    targets.append(encoded_text[i+seq_length])
+
+# Convert to PyTorch tensors
+sequences = torch.tensor(sequences, dtype=torch.long)
+targets = torch.tensor(targets, dtype=torch.long)
+
+# Create a dataset and dataloader
+class ShakespeareDataset(Dataset):
+    def __init__(self, sequences, targets):
+        self.sequences = sequences
+        self.targets = targets
+    
+    def __len__(self):
+        return len(self.sequences)
+    
+    def __getitem__(self, idx):
+        return self.sequences[idx], self.targets[idx]
+
+dataset = ShakespeareDataset(sequences, targets)
+dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+
+# Define the RNN class
+class RNNModel(nn.Module):
+    def __init__(self, vocab_size, embed_size, hidden_size, num_layers, dropout=0.5):
+        super(RNNModel, self).__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_size)
+        self.rnn = nn.RNN(embed_size, hidden_size, num_layers, dropout=dropout, batch_first=True)
+        self.fc = nn.Linear(hidden_size, vocab_size)
+    
+    def forward(self, x, hidden):
+        x = self.embedding(x)
+        out, hidden = self.rnn(x, hidden)
+        out = self.fc(out.reshape(-1, out.size(2)))
+        return out, hidden
+
+# Define the LSTM class
+class LSTMModel(nn.Module):
+    def __init__(self, vocab_size, embed_size, hidden_size, num_layers, dropout=0.5):
+        super(LSTMModel, self).__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_size)
+        self.lstm = nn.LSTM(embed_size, hidden_size, num_layers, dropout=dropout, batch_first=True)
+        self.fc = nn.Linear(hidden_size, vocab_size)
+    
+    def forward(self, x, hidden):
+        x = self.embedding(x)
+        out, (hidden, cell) = self.lstm(x, hidden)
+        out = self.fc(out.reshape(-1, out.size(2)))
+        return out, (hidden, cell)
+
+# Define the GRU class
+class GRUModel(nn.Module):
+    def __init__(self, vocab_size, embed_size, hidden_size, num_layers, dropout=0.5):
+        super(GRUModel, self).__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_size)
+        self.gru = nn.GRU(embed_size, hidden_size, num_layers, dropout=dropout, batch_first=True)
+        self.fc = nn.Linear(hidden_size, vocab_size)
+    
+    def forward(self, x, hidden):
+        x = self.embedding(x)
+        out, hidden = self.gru(x, hidden)
+        out = self.fc(out.reshape(-1, out.size(2)))
+        return out, hidden
+
+# Training function
+def train(model, dataloader, epochs, lr, clip):
+    model.train()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    criterion = nn.CrossEntropyLoss()
+    loss_history = []
+    for epoch in range(epochs):
+        hidden = None
+        total_loss = 0
+        for x, y in dataloader:
+            optimizer.zero_grad()
+            output, hidden = model(x, hidden)
+            loss = criterion(output, y.view(-1))
+            loss.backward()
+            # Gradient clipping
+            torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
+            optimizer.step()
+            total_loss += loss.item()
+        avg_loss = total_loss / len(dataloader)
+        loss_history.append(avg_loss)
+        print(f"Epoch {epoch+1}, Loss: {avg_loss}")
+    return loss_history
+
+# Define model parameters
+vocab_size = len(vocab)
+embed_size = 128
+hidden_size = 256
+num_layers = 2
+dropout = 0.5
+epochs = 20
+lr = 0.001
+clip = 5
+
+# Initialize and train the RNN model
+rnn_model = RNNModel(vocab_size, embed_size, hidden_size, num_layers, dropout)
+rnn_loss_history = train(rnn_model, dataloader, epochs, lr, clip)
+
+# Initialize and train the LSTM model
+lstm_model = LSTMModel(vocab_size, embed_size, hidden_size, num_layers, dropout)
+lstm_loss_history = train(lstm_model, dataloader, epochs, lr, clip)
+
+# Initialize and train the GRU model
+gru_model = GRUModel(vocab_size, embed_size, hidden_size, num_layers, dropout)
+gru_loss_history = train(gru_model, dataloader, epochs, lr, clip)
+
+# Function to generate text
+def generate_text(model, start_text, length, vocab_to_int, int_to_vocab):
+    model.eval()
+    input_seq = torch.tensor([vocab_to_int[word] for word in start_text.split()], dtype=torch.long).unsqueeze(0)
+    hidden = None
+    generated_text = start_text
+    for _ in range(length):
+        output, hidden = model(input_seq, hidden)
+        _, top_idx = torch.topk(output[-1], 1)
+        next_word = int_to_vocab[top_idx.item()]
+        generated_text += ' ' + next_word
+        input_seq = torch.cat((input_seq, top_idx.unsqueeze(0)), dim=1)
+    return generated_text
+
+# Generate sample text
+sample_text_rnn = generate_text(rnn_model, "shall i compare thee", 50, vocab_to_int, int_to_vocab)
+sample_text_lstm = generate_text(lstm_model, "shall i compare thee", 50, vocab_to_int, int_to_vocab)
+sample_text_gru = generate_text(gru_model, "shall i compare thee", 50, vocab_to_int, int_to_vocab)
+
+print("RNN Generated Text:")
+print(sample_text_rnn)
+print("\nLSTM Generated Text:")
+print(sample_text_lstm)
+print("\nGRU Generated Text:")
+print(sample_text_gru)
+
+# Plot the training loss
+plt.plot(range(epochs), rnn_loss_history, label='RNN')
+plt.plot(range(epochs), lstm_loss_history, label='LSTM')
+plt.plot(range(epochs), gru_loss_history, label='GRU')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.title('Training Loss over Epochs')
+plt.legend()
+plt.show()

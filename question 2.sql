@@ -1,0 +1,24 @@
+CREATE TABLE Members (
+    MemberID INT PRIMARY KEY NOT NULL UNIQUE,
+    Name VARCHAR(100) NOT NULL,
+    ContactInfo VARCHAR(100) NOT NULL,
+    MembershipDate DATE NOT NULL
+);
+
+CREATE TABLE Books (
+    ISBN VARCHAR(20) PRIMARY KEY NOT NULL UNIQUE,
+    Title VARCHAR(200) NOT NULL,
+    Author VARCHAR(100) NOT NULL,
+    Publisher VARCHAR(100) NOT NULL,
+    PubYear INT NOT NULL CHECK (PubYear > 0)
+);
+
+CREATE TABLE Borrowings (
+    BorrowingID INT PRIMARY KEY NOT NULL UNIQUE,
+    BorrowingDate DATE NOT NULL,
+    DueDate DATE NOT NULL,
+    ReturnDate DATE,
+    MemberID INT NOT NULL,
+    ISBN VARCHAR(20) NOT NULL,
+    FOREIGN KEY (MemberID) REFERENCES Members(MemberID)
+);

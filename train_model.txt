@@ -1,0 +1,28 @@
+import pickle
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+import numpy as np
+
+# Load face data and labels
+with open('data/names.pkl', 'rb') as w:
+    LABELS = pickle.load(w)
+with open('data/faces_data.pkl', 'rb') as f:
+    FACES = pickle.load(f)
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(FACES, LABELS, test_size=0.2, random_state=42)
+
+print('Shape of Training Faces:', X_train.shape)
+print('Shape of Testing Faces:', X_test.shape)
+
+# Initialize KNN classifier and train
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
+
+# Save the trained model
+with open('data/knn_model.pkl', 'wb') as model_file:
+    pickle.dump(knn, model_file)
+
+# Evaluate accuracy on the test set
+accuracy = knn.score(X_test, y_test)
+print(f'Accuracy on the test set: {accuracy}')
